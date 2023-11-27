@@ -34,7 +34,6 @@ jobs:
       - name: Setting Environment Variables
         run: |
           echo "VITE_FUNCTION_ENDPOINT=${{ secrets.VITE_FUNCTION_ENDPOINT }}" >> .env.production
-          echo "VITE_AUTH_KEY=${{ secrets.VITE_AUTH_KEY }}" >> .env.production
       - name: Build
         run: npm run build
       - name: Setup Pages

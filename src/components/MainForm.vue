@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import Sparkles from "./Sparkles.vue";
 import ScoreInput from "./ScoreInput.vue";
+import Spinner from "./Spinner.vue"
 
 const scores = ref<{
   math: number;
@@ -20,13 +21,14 @@ const scores = ref<{
 const prediction = ref<boolean | null>(null);
 const probability = ref<number | null>(null);
 const error = ref<boolean>(false)
+const loading = ref(false)
 
 const submit = () => {
+  loading.value = true
   fetch(import.meta.env.VITE_FUNCTION_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${import.meta.env.VITE_AUTH_KEY}`
     },
     body: JSON.stringify(scores.value),
   })
@@ -40,7 +42,7 @@ const submit = () => {
       probability.value = prediction.value
         ? data.probability[1]
         : data.probability[0];
-    });
+    }).finally(() => loading.value = false);
 };
 </script>
 
@@ -54,9 +56,10 @@ const submit = () => {
       <ScoreInput @change="prediction = null" v-model="scores.english" label="Inglés" />
     </div>
     <button type="submit"
-      class="bg-indigo-500 hover:bg-indigo-400 text-white font-semibold py-2 px-4 rounded-md text-sm tracking-wide shadow-lg border-t-white/20 border-t flex items-center gap-1"
-      @click="submit">
-      <Sparkles class="h-4 w-4" />
+      class="bg-indigo-500 hover:bg-indigo-400 text-white font-semibold py-2 px-4 rounded-md text-sm tracking-wide shadow-lg border-t-white/20 border-t flex items-center gap-1 disabled:bg-indigo-400"
+      @click="submit" :disabled="loading">
+      <Spinner v-if="loading" class="h-4 w-4 animate-spin" />
+      <Sparkles class="h-4 w-4" v-else />
       Pronosticar
     </button>
     <div v-show="error" class="text-center px-20 py-10 rounded-md bg-gray-50/50 border border-gray-300 drop-shadow-sm">
