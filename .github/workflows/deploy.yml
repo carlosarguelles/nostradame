@@ -31,6 +31,10 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm install
+      - name: Setting Environment Variables
+        run: |
+          echo "VITE_FUNCTION_ENDPOINT=${{ secrets.VITE_FUNCTION_ENDPOINT }}" >> .env.production
+          echo "VITE_AUTH_KEY=${{ secrets.VITE_AUTH_KEY }}" >> .env.production
       - name: Build
         run: npm run build
       - name: Setup Pages
@@ -38,11 +42,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          # Upload dist repository
           path: './dist'
-          env: |
-            VITE_FUNCTION_ENDPOINT: ${{ secrets.VITE_FUNCTION_ENDPOINT }}
-            VITE_AUTH_KEY: ${{ secrets.VITE_AUTH_KEY }}
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
