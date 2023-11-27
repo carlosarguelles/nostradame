@@ -18,7 +18,7 @@ const scores = ref<{
   english: 0,
 });
 
-const prediction = ref<boolean | null>(null);
+const shouldStudyStem = ref<boolean | null>(null);
 const probability = ref<number | null>(null);
 const error = ref<boolean>(false)
 const loading = ref(false)
@@ -38,22 +38,25 @@ const submit = () => {
     .catch(_ => error.value = true)
     .then((data) => {
       const [f, t] = data.prediction
-      prediction.value = t > f
-      probability.value = prediction.value
-        ? data.probability[1]
-        : data.probability[0];
+      shouldStudyStem.value = t > f
+      probability.value = shouldStudyStem.value ? t : f;
     }).finally(() => loading.value = false);
 };
+
+const onScoreInputChange = () => {
+  shouldStudyStem.value = null
+  error.value = false
+}
 </script>
 
 <template>
   <div class="flex flex-col items-center gap-6">
     <div class="flex gap-4 w-full justify-between max-w-3xl mx-auto">
-      <ScoreInput @change="prediction = null" v-model="scores.critical_reading" label="Lectura crítica" />
-      <ScoreInput @change="prediction = null" v-model="scores.math" label="Matemáticas" />
-      <ScoreInput @change="prediction = null" v-model="scores.social_science" label="Ciencias sociales" />
-      <ScoreInput @change="prediction = null" v-model="scores.natural_science" label="Ciencias naturales" />
-      <ScoreInput @change="prediction = null" v-model="scores.english" label="Inglés" />
+      <ScoreInput @change="onScoreInputChange" v-model="scores.critical_reading" label="Lectura crítica" />
+      <ScoreInput @change="onScoreInputChange" v-model="scores.math" label="Matemáticas" />
+      <ScoreInput @change="onScoreInputChange" v-model="scores.social_science" label="Ciencias sociales" />
+      <ScoreInput @change="onScoreInputChange" v-model="scores.natural_science" label="Ciencias naturales" />
+      <ScoreInput @change="onScoreInputChange" v-model="scores.english" label="Inglés" />
     </div>
     <button type="submit"
       class="bg-indigo-500 hover:bg-indigo-400 text-white font-semibold py-2 px-4 rounded-md text-sm tracking-wide shadow-lg border-t-white/20 border-t flex items-center gap-1 disabled:bg-indigo-400"
@@ -65,9 +68,9 @@ const submit = () => {
     <div v-show="error" class="text-center px-20 py-10 rounded-md bg-gray-50/50 border border-gray-300 drop-shadow-sm">
       Error obteniendo predicción, intente más tarde.
     </div>
-    <div v-show="prediction != null"
+    <div v-show="shouldStudyStem != null"
       class="text-center px-20 py-10 rounded-md bg-gray-50/50 border border-gray-300 drop-shadow-sm">
-      {{ prediction ? "" : "No" }} deberías estudiar una carrera STEM, con una probablidad de {{
+      {{ shouldStudyStem ? "Deberías" : "No deberías" }} estudiar una carrera STEM, con una probablidad de {{
         Number((probability ?? 0) * 100).toLocaleString("es-CO", {
           maximumFractionDigits: 2,
         })
